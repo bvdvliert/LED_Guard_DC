@@ -22,10 +22,10 @@
 
 #define MAXAQ 116 // MAX 118! //The value when the AQ outputs 10V
 
-#define AVERAGEFROM 5
+#define AVERAGEFROM 100 // Max 60
 
-#if MAXAQ > 124
-#error "MAXAQ may nog be greater than 124"
+#if MAXAQ > 118
+#error "MAXAQ may nog be greater than 118"
 #endif
 
 void write(int port, int pin, bool state)
@@ -146,66 +146,36 @@ unsigned char EEPROM_read(unsigned char ucAddress)
   return EEDR;
 }
 
-uint8_t maxOutputVoltage;
+uint8_t maxOutputVoltage; // Max output voltage (5-10V) based on the potentiometer, only determined at start of calibration
 
-uint16_t maxCurrent;
-uint16_t getCalibCurrentValue(uint8_t i){
-  return (uint32_t)EEPROM_read(i + 5)  * maxCurrent / 255;
+uint8_t getCalibCurrentValue(uint8_t i)
+{
+  return EEPROM_read(i + 1);
 }
-void setCalibCurrentValue(uint8_t i, uint32_t value){
-  EEPROM_write(i + 5, value * 255 / maxCurrent);
+void setCalibCurrentValue(uint8_t i, uint8_t value)
+{
+  EEPROM_write(i + 1, value);
 }
 
-uint16_t maxVoltage;
-uint16_t getCalibVoltageValue(uint8_t i){
-  return (uint32_t)EEPROM_read(i + 65)  * maxVoltage / 255;
-}
-void setCalibVoltageValue(uint8_t i, uint32_t value){
-  EEPROM_write(i + 65, value * 255 / maxVoltage);
+uint16_t readAvgADC(uint8_t adc)
+{
+  uint32_t sum = 0;
+  for (int i = 0; i < AVERAGEFROM; i++)
+  {
+    sum += readADC(adc);
+    delay(4);
+  }
+  return (uint32_t)(sum / AVERAGEFROM);
 }
 
 void setCalibrationValues()
 {
-  uint16_t maxCurrent = 0, maxVoltage = 0;
-  // Determine the maximum value
-  for (int i = 0; i < maxOutputVoltage / 2 + 1; i++)
-  {
-    if (calibCurrentValues[i] > maxCurrent)
-      maxCurrent = calibCurrentValues[i];
-    if (calibVoltageValues[i] > maxVoltage)
-      maxVoltage = calibVoltageValues[i];
-  }
-
-  // Save the maximum value
-  EEPROM_write(0, maxCurrent >> 8);
-  EEPROM_write(1, maxCurrent & 0x00FF);
-  EEPROM_write(2, maxVoltage >> 8);
-  EEPROM_write(3, maxVoltage & 0x00FF);
-  EEPROM_write(4, maxOutputVoltage);
-
-  // Save the values scaled from 0..MaxOutputVoltage to 0..255
-  for (int i = 0; i < maxOutputVoltage / 2; i++)
-  {
-    EEPROM_write(i + 5, (uint32_t)calibCurrentValues[i] * 255 / maxCurrent);
-    EEPROM_write(i + 65, (uint32_t)calibVoltageValues[i] * 255 / maxVoltage);
-  }
+  EEPROM_write(0, maxOutputVoltage);
 }
 
 void getCalibrationValues()
 {
-  // Inverted setCalibrationValues
-
-  // Get the maximum values
-  uint16_t maxCurrent = EEPROM_read(0) << 8 | EEPROM_read(1);
-  uint16_t maxVoltage = EEPROM_read(2) << 8 | EEPROM_read(3);
-  uint8_t maxOutputVoltageCalib = EEPROM_read(4);
-
-  // Get the values scaled from 0..255 to 0..MaxOutputVoltageCalib
-  for (int i = 0; i < maxOutputVoltageCalib / 2; i++)
-  {
-    calibCurrentValues[i] = (uint32_t)EEPROM_read(i + 5)  * maxCurrent / 255;
-    calibVoltageValues[i] = (uint32_t)EEPROM_read(i + 65)  * maxVoltage / 255;
-  }
+  maxOutputVoltage = EEPROM_read(0);
 }
 
 void setup()
@@ -227,8 +197,6 @@ void setup()
   // Enable ADC (ADC Control and Status Register A)
   ADCSRA = B10000000;
 
-  writeAQ(0);
-
   getCalibrationValues();
 }
 
@@ -244,22 +212,76 @@ void loop()
   static State state = DEFAULTSTATE;
   static State nextState = DEFAULTSTATE;
 
-  // Calculate the maximum ouput voltage based on the potentiometer
-  maxOutputVoltage = MAXAQ / 2 + (1023 - readADC(AI_POT)) * (MAXAQ / 2 + MAXAQ % 2) / 1023;
-
   switch (state)
   {
   case DEFAULTSTATE:
   {
+    const uint8_t maxWrongCount = 10;
+    static uint8_t wrongCount = 0;
+    static bool alarmState = false;
+    static bool blockVoltage = false;
+    static uint32_t alarmOnMils;
     if (lastState != DEFAULTSTATE)
     {
       write(PB, Q_LED_CALIBRATION, LOW);
+      alarmState = false;
+      wrongCount = 0;
     }
 
-    bool switchState = !(PINA & (1 << I_BUTTON));
-    if (switchState)
+    bool buttonState = !(PINA & (1 << I_BUTTON));
+    if (buttonState)
       nextState = CALIBRATIONSTATE;
 
+    uint16_t analogSum = readAvgADC(AI_ANALOG);
+
+    static uint8_t lastOutputVoltage = 0;
+    uint8_t outputVoltage = (uint32_t)analogSum * maxOutputVoltage / 186;
+    if (outputVoltage > maxOutputVoltage)
+      outputVoltage = maxOutputVoltage;
+
+    if (outputVoltage > lastOutputVoltage + 2 || outputVoltage < lastOutputVoltage - 2) // If the difference is larger than 2, use the calculated value
+      outputVoltage = outputVoltage;
+    else if (outputVoltage > lastOutputVoltage + 1) // If the difference is equal to 2, change the value by 1
+      outputVoltage = lastOutputVoltage + 1;
+    else if (outputVoltage < lastOutputVoltage - 1)
+      outputVoltage = lastOutputVoltage - 1;
+    // If the difference is only 1, don't change the output voltage
+
+    writeAQ(blockVoltage ? 0 : outputVoltage);
+    lastOutputVoltage = outputVoltage;
+
+    // delay(100);
+
+    // Determine if current is wrong
+    bool wrong = false;
+    uint16_t currentSum = readAvgADC(AI_CURRENT);
+    if (currentSum >= 102)
+      currentSum -= 102;
+    else
+      currentSum = 0;
+    uint8_t faultPercentage = getFaultPercentage();
+    uint16_t minCurrent = (uint32_t)getCalibCurrentValue(outputVoltage) * (100 - faultPercentage) / 100;
+    uint16_t maxCurrent = (uint32_t)getCalibCurrentValue(outputVoltage) * (100 + faultPercentage) / 100;
+    if (currentSum + 1 < minCurrent)
+      wrong = true;
+    if (maxCurrent < (currentSum - 1) && currentSum >= 1)
+      wrong = true;
+    if (!wrong && wrongCount)
+      wrongCount--;
+    else if (wrong)
+      wrongCount++;
+
+    if (!alarmState){
+      alarmState = blockVoltage = wrongCount >= maxWrongCount;
+      if(alarmState)
+        alarmOnMils = millis();
+    }
+    else if (millis() - alarmOnMils >= 5000) // After alarm goes on, the 0-10V should be throughputted for hand mode
+      blockVoltage = false;
+
+    write(PA, Q_RELAY, !alarmState);
+    write(PB, Q_ALARM, alarmState);
+    write(PB, Q_LED_ALARM, alarmState || wrong);
     break;
   }
   case CALIBRATIONSTATE:
@@ -272,31 +294,37 @@ void loop()
     {
       write(PB, Q_LED_CALIBRATION, HIGH);
       write(PA, Q_RELAY, HIGH);
-      write(PA, Q_LED_ALARM, LOW);
-      outputVoltage = 0;
+      write(PB, Q_LED_ALARM, LOW);
+      write(PB, Q_ALARM, LOW);
+      // Calculate the maximum ouput voltage based on the potentiometer
+      // maxOutputVoltage = MAXAQ / 2 + (uint32_t)(1023 - readADC(AI_POT)) * (MAXAQ / 2 + MAXAQ % 2) / 1023; // Dont know why but it outputs 8V when turning pot to 10V
+      if(readADC(AI_POT) > 511) // 5V
+        maxOutputVoltage = MAXAQ / 2 + MAXAQ % 2;
+      else // 10V
+        maxOutputVoltage = MAXAQ;
+      outputVoltage = maxOutputVoltage;
       writeAQ(outputVoltage);
       lastIncrementMillis = mils;
     }
 
-    if (mils - lastIncrementMillis >= 2000)
+    if (mils - lastIncrementMillis >= 3000)
     {
-      int currentSum = 0;
-      int voltageSum = 0;
-      for (int i = 0; i < AVERAGEFROM; i++)
-      {
-        currentSum += readADC(AI_CURRENT);
-        voltageSum += readADC(AI_SWITCH);
-        delay(10);
-      }
-      setCalibCurrentValue[outputVoltage / 2] = currentSum / AVERAGEFROM;
-      calibVoltageValues[outputVoltage / 2] = voltageSum / AVERAGEFROM;
-      if (maxOutputVoltage > outputVoltage)
-        outputVoltage += 2;
+      uint16_t currentSum = readAvgADC(AI_CURRENT);
+      if (currentSum >= 102)
+        currentSum -= 102;
+      else
+        currentSum = 0;
+
+      setCalibCurrentValue(outputVoltage, currentSum);
+
+      if (outputVoltage >= 1)
+        outputVoltage -= 1;
       else
       {
         setCalibrationValues();
         nextState = DEFAULTSTATE;
       }
+
       writeAQ(outputVoltage);
       lastIncrementMillis = mils;
     }
