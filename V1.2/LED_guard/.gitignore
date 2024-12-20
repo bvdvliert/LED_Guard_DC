@@ -1,0 +1,6 @@
+trash/
+.vscode/
+DefaultBuild/
+SmartManual Docs/
+*.mtud
+QualityReport*
