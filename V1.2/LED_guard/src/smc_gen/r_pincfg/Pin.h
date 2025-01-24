@@ -87,11 +87,11 @@ Global functions
 ***********************************************************************************************************************/
 void R_Pins_Create(void);
 /* Start user code for function. Do not edit comment generated here */
-#define ANI0_POT        _00_AD_INPUT_CHANNEL_0
-#define ANI1_DIP        _01_AD_INPUT_CHANNEL_1
-#define ANI4_CURRENT    _04_AD_INPUT_CHANNEL_4
-#define ANI5_SWITCH     _05_AD_INPUT_CHANNEL_5
-#define ANI6_AI         _06_AD_INPUT_CHANNEL_6
-#define ANI7_VIN        _07_AD_INPUT_CHANNEL_7
+#define ANI0_POT        ADCHANNEL0
+#define ANI1_DIP        ADCHANNEL1
+#define ANI4_CURRENT    ADCHANNEL4
+#define ANI5_SWITCH     ADCHANNEL5
+#define ANI6_AI         ADCHANNEL6
+#define ANI7_VIN        ADCHANNEL7
 /* End user code. Do not edit comment generated here */
 #endif

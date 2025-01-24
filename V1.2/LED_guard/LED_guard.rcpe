@@ -72,6 +72,8 @@
         <Category Name="r_config">
           <Path>src\smc_gen\r_config\r_bsp_config.h</Path>
           <Path>src\smc_gen\r_config\r_bsp_config.inc</Path>
+          <Path>src\smc_gen\r_config\r_rfd_rl78_common_config.h</Path>
+          <Path>src\smc_gen\r_config\r_rfd_rl78_data_flash_config.h</Path>
         </Category>
         <Category Name="r_pincfg">
           <Path>src\smc_gen\r_pincfg\Pin.c</Path>
@@ -91,6 +93,67 @@
           <Path>src\smc_gen\Config_PORT\Config_PORT.c</Path>
           <Path>src\smc_gen\Config_PORT\Config_PORT.h</Path>
           <Path>src\smc_gen\Config_PORT\Config_PORT_user.c</Path>
+        </Category>
+        <Category Name="demo">
+          <Path>src\smc_gen\demo\DF_sample.zip</Path>
+        </Category>
+        <Category Name="r_rfd_rl78_common">
+          <Path>src\smc_gen\r_rfd_rl78_common\readme.txt</Path>
+          <Path>src\smc_gen\r_rfd_rl78_common\r_rfd_rl78_common_if.h</Path>
+          <Category Name="doc">
+            <Category Name="en">
+              <Path>src\smc_gen\r_rfd_rl78_common\doc\en\r20an0656ej0120-rl78.pdf</Path>
+            </Category>
+            <Category Name="ja">
+              <Path>src\smc_gen\r_rfd_rl78_common\doc\ja\r20an0656jj0120-rl78.pdf</Path>
+            </Category>
+          </Category>
+          <Category Name="src">
+            <Category Name="include">
+              <Path>src\smc_gen\r_rfd_rl78_common\src\include\r_rfd_common_api.h</Path>
+              <Path>src\smc_gen\r_rfd_rl78_common\src\include\r_rfd_common_control_api.h</Path>
+              <Path>src\smc_gen\r_rfd_rl78_common\src\include\r_rfd_common_userown.h</Path>
+              <Category Name="rfd">
+                <Path>src\smc_gen\r_rfd_rl78_common\src\include\rfd\r_rfd.h</Path>
+                <Path>src\smc_gen\r_rfd_rl78_common\src\include\rfd\r_rfd_compiler.h</Path>
+                <Path>src\smc_gen\r_rfd_rl78_common\src\include\rfd\r_rfd_device.h</Path>
+                <Path>src\smc_gen\r_rfd_rl78_common\src\include\rfd\r_rfd_memmap.h</Path>
+                <Path>src\smc_gen\r_rfd_rl78_common\src\include\rfd\r_rfd_types.h</Path>
+                <Path>src\smc_gen\r_rfd_rl78_common\src\include\rfd\r_typedefs.h</Path>
+              </Category>
+            </Category>
+            <Category Name="source">
+              <Category Name="common">
+                <Path>src\smc_gen\r_rfd_rl78_common\src\source\common\r_rfd_common_api.c</Path>
+                <Path>src\smc_gen\r_rfd_rl78_common\src\source\common\r_rfd_common_control_api.c</Path>
+              </Category>
+            </Category>
+            <Category Name="userown">
+              <Path>src\smc_gen\r_rfd_rl78_common\src\userown\r_rfd_common_userown.c</Path>
+            </Category>
+          </Category>
+        </Category>
+        <Category Name="r_rfd_rl78_dataflash">
+          <Path>src\smc_gen\r_rfd_rl78_dataflash\readme.txt</Path>
+          <Path>src\smc_gen\r_rfd_rl78_dataflash\r_rfd_rl78_data_flash_if.h</Path>
+          <Category Name="doc">
+            <Category Name="en">
+              <Path>src\smc_gen\r_rfd_rl78_dataflash\doc\en\r20an0654ej0120-rl78.pdf</Path>
+            </Category>
+            <Category Name="ja">
+              <Path>src\smc_gen\r_rfd_rl78_dataflash\doc\ja\r20an0654jj0120-rl78.pdf</Path>
+            </Category>
+          </Category>
+          <Category Name="src">
+            <Category Name="include">
+              <Path>src\smc_gen\r_rfd_rl78_dataflash\src\include\r_rfd_data_flash_api.h</Path>
+            </Category>
+            <Category Name="source">
+              <Category Name="dataflash">
+                <Path>src\smc_gen\r_rfd_rl78_dataflash\src\source\dataflash\r_rfd_data_flash_api.c</Path>
+              </Category>
+            </Category>
+          </Category>
         </Category>
       </Category>
     </Files>
@@ -122,8 +185,17 @@
           <Path>DefaultBuild\Config_PORT_user.obj</Path>
           <Path>DefaultBuild\r_cg_ad_common.obj</Path>
           <Path>DefaultBuild\r_cg_da_common.obj</Path>
+          <Path>DefaultBuild\r_rfd_common_api.obj</Path>
+          <Path>DefaultBuild\r_rfd_common_control_api.obj</Path>
+          <Path>DefaultBuild\r_rfd_common_userown.obj</Path>
+          <Path>DefaultBuild\r_rfd_data_flash_api.obj</Path>
         </LinkOrder>
         <CommonOptions>
+          <IncludePathForC>src\smc_gen\r_rfd_rl78_dataflash\src\include</IncludePathForC>
+          <IncludePathForC>src\smc_gen\r_rfd_rl78_dataflash</IncludePathForC>
+          <IncludePathForC>src\smc_gen\r_rfd_rl78_common\src\include\rfd</IncludePathForC>
+          <IncludePathForC>src\smc_gen\r_rfd_rl78_common\src\include</IncludePathForC>
+          <IncludePathForC>src\smc_gen\r_rfd_rl78_common</IncludePathForC>
           <IncludePathForC>src\smc_gen\Config_PORT</IncludePathForC>
           <IncludePathForC>src\smc_gen\Config_DAC0</IncludePathForC>
           <IncludePathForC>src\smc_gen\Config_ADC</IncludePathForC>
@@ -137,6 +209,7 @@
           <IncludePathForC>src\smc_gen\general</IncludePathForC>
           <IncludePathForAsm>src\smc_gen\r_config</IncludePathForAsm>
           <IncludePathForAsm>src\smc_gen\r_bsp\board\generic_rl78_g23</IncludePathForAsm>
+          <MacroForC>R_RFD_MCU_FLASH_T01_CATEGORY01</MacroForC>
         </CommonOptions>
         <GeneralOptions>
           <SimultaneouslyBuild>False</SimultaneouslyBuild>
@@ -147,6 +220,11 @@
           <Option>-dev=%MicomToolPath%\Device\RL78\Devicefile\DR7F100GGF.DVF</Option>
           <Option>-g</Option>
           <Option>-g_line</Option>
+          <Option>-I src\smc_gen\r_rfd_rl78_dataflash\src\include</Option>
+          <Option>-I src\smc_gen\r_rfd_rl78_dataflash</Option>
+          <Option>-I src\smc_gen\r_rfd_rl78_common\src\include\rfd</Option>
+          <Option>-I src\smc_gen\r_rfd_rl78_common\src\include</Option>
+          <Option>-I src\smc_gen\r_rfd_rl78_common</Option>
           <Option>-I src\smc_gen\Config_PORT</Option>
           <Option>-I src\smc_gen\Config_DAC0</Option>
           <Option>-I src\smc_gen\Config_ADC</Option>
@@ -158,6 +236,7 @@
           <Option>-I src\smc_gen\r_bsp\board\generic_rl78_g23</Option>
           <Option>-I src\smc_gen\r_bsp</Option>
           <Option>-I src\smc_gen\general</Option>
+          <Option>-D R_RFD_MCU_FLASH_T01_CATEGORY01</Option>
           <Option>-lang=c99</Option>
           <Option>-c</Option>
         </CompileOptions>

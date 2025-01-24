@@ -259,33 +259,6 @@
         <option id="com.renesas.smc.code.type" value="Normal Folder"/>
     </tool>
     <tool id="SWComponent" version="1.0.0.0">
-        <configuration inuse="true" name="r_bsp">
-            <component description="Dependencies : None&#10;The r_bsp package provides a foundation for code to be built on top of. It provides startup code, iodefines, and MCU information for different boards. There are 2 folders that make up the r_bsp package. The 'mcu' folder contains files that are common to a MCU group. These files provide functionality such as easy register access, CPU functions, and a file named 'mcu_info.h' for each MCU group. The 'mcu_info.h' file has information about the MCU on the board and is configured based on the information given in r_bsp_config.h. The information in 'mcu_info.h' is used to help configure Renesas middleware that uses the r_bsp package. The 'board' folder has a folder with startup code for each supported board.  Which MCU and board is chosen is decided by the settings in 'platform.h'. The user can choose which board they are using by uncommenting the include path that applies to their board. For example, if you are using the RSK+RX64M then you would uncomment the #include &quot;./board/generic_rx64m/r_bsp.h&quot; include path. Users are encouraged to add their own boards to the 'board' directory. BSPs are configured by using the r_bsp_config.h file. Each board will have a reference configuration file named r_bsp_config_reference.h. The user should copy this file to their project, rename it to r_bsp_config.h, and use the options inside the file to configure the BSP for their project." detailDescription="Board Support Packages. - v1.70" display="r_bsp" id="r_bsp1.70" version="1.70">
-                <gridItem id="BSP_CFG_STARTUP_DISABLE" selectedIndex="0"/>
-                <gridItem id="BSP_CFG_INVALID_MEMORY_ACCESS_DETECTION_ENABLE" selectedIndex="0"/>
-                <gridItem id="BSP_CFG_RAM_GUARD_FUNC" selectedIndex="0"/>
-                <gridItem id="BSP_CFG_PORT_FUNCTION_GUARD" selectedIndex="1"/>
-                <gridItem id="BSP_CFG_INT_FUNCTION_GUARD" selectedIndex="0"/>
-                <gridItem id="BSP_CFG_CHIP_STATE_CTRL_GUARD" selectedIndex="0"/>
-                <gridItem id="BSP_CFG_DATA_FLASH_ACCESS_ENABLE" selectedIndex="0"/>
-                <gridItem id="BSP_CFG_CONFIGURATOR_SELECT" selectedIndex="1"/>
-                <gridItem id="BSP_CFG_CLOCK_OPERATION_API_FUNCTIONS_DISABLE" selectedIndex="1"/>
-                <gridItem id="BSP_CFG_GET_FREQ_API_FUNCTIONS_DISABLE" selectedIndex="0"/>
-                <gridItem id="BSP_CFG_SET_CLOCK_SOURCE_API_FUNCTIONS_DISABLE" selectedIndex="1"/>
-                <gridItem id="BSP_CFG_CHANGE_CLOCK_SETTING_API_FUNCTIONS_DISABLE" selectedIndex="1"/>
-                <gridItem id="BSP_CFG_SOFTWARE_DELAY_API_FUNCTIONS_DISABLE" selectedIndex="0"/>
-                <gridItem id="BSP_CFG_PARAM_CHECKING_ENABLE" selectedIndex="1"/>
-                <gridItem id="BSP_CFG_USER_WARM_START_CALLBACK_PRE_INITC_ENABLED" selectedIndex="0"/>
-                <gridItem id="BSP_CFG_USER_WARM_START_PRE_C_FUNCTION" selectedIndex="my_sw_warmstart_prec_function"/>
-                <gridItem id="BSP_CFG_USER_WARM_START_CALLBACK_POST_INITC_ENABLED" selectedIndex="0"/>
-                <gridItem id="BSP_CFG_USER_WARM_START_POST_C_FUNCTION" selectedIndex="my_sw_warmstart_postc_function"/>
-                <gridItem id="BSP_CFG_WDT_REFRESH_ENABLE" selectedIndex="0"/>
-                <gridItem id="BSP_CFG_USER_WDT_REFRESH_INIT_FUNCTION" selectedIndex="my_sw_wdt_refresh_init_function"/>
-                <gridItem id="BSP_CFG_USER_WDT_REFRESH_SETTING_FUNCTION" selectedIndex="my_sw_wdt_refresh_setting_function"/>
-            </component>
-            <source description="RL78 Software Integration System" display="RL78 Software Integration System" id="com.renesas.smc.tools.swcomponent.rl78.sis.source"/>
-            <source description="RL78 Software Integration System" display="RL78 Software Integration System" id="com.renesas.smc.tools.swcomponent.rl78.sis.source"/>
-        </configuration>
         <configuration apiMode="FULL_API" id="8c4229b4-0bcc-4199-acd3-faf49bf2e60c" inuse="true" name="Config_PORT">
             <allocatable id="Port">
                 <allocatable id="PORT0_Check">
@@ -899,6 +872,43 @@
                 <context/>
             </allocator>
             <source description="Code generator components provide peripheral drivers with customized generated source geared towards small code size" display="Code Generator" id="com.renesas.smc.tools.swcomponent.codegenerator.source"/>
+        </configuration>
+        <configuration inuse="true" name="r_rfd_rl78_t01_common">
+            <component description="Dependency : r_bsp version(s) 1.62&#10;The common API functions of Renesas Flash Driver RL78 Type 01 are called from the user program to reprogram the code flash memory or data flash memory or extra area in the RL78/G2x." detailDescription="Flash Driver[Renesas Flash Driver RL78 Type01 Flash Common]" display="r_rfd_rl78_t01_common" id="r_rfd_rl78_t01_common1.20" version="1.20"/>
+            <source description="Components supporting Software integration" display="Generic SW" id="com.renesas.smc.tools.swcomponent.generic.source"/>
+            <source description="Components supporting Software integration" display="Generic SW" id="com.renesas.smc.tools.swcomponent.generic.source"/>
+        </configuration>
+        <configuration inuse="true" name="r_bsp">
+            <component description="Dependencies : None&#10;The r_bsp package provides a foundation for code to be built on top of. It provides startup code, iodefines, and MCU information for different boards. There are 2 folders that make up the r_bsp package. The 'mcu' folder contains files that are common to a MCU group. These files provide functionality such as easy register access, CPU functions, and a file named 'mcu_info.h' for each MCU group. The 'mcu_info.h' file has information about the MCU on the board and is configured based on the information given in r_bsp_config.h. The information in 'mcu_info.h' is used to help configure Renesas middleware that uses the r_bsp package. The 'board' folder has a folder with startup code for each supported board.  Which MCU and board is chosen is decided by the settings in 'platform.h'. The user can choose which board they are using by uncommenting the include path that applies to their board. For example, if you are using the RSK+RX64M then you would uncomment the #include &quot;./board/generic_rx64m/r_bsp.h&quot; include path. Users are encouraged to add their own boards to the 'board' directory. BSPs are configured by using the r_bsp_config.h file. Each board will have a reference configuration file named r_bsp_config_reference.h. The user should copy this file to their project, rename it to r_bsp_config.h, and use the options inside the file to configure the BSP for their project." detailDescription="Board Support Packages. - v1.70" display="r_bsp" id="r_bsp1.70" version="1.70">
+                <gridItem id="BSP_CFG_STARTUP_DISABLE" selectedIndex="0"/>
+                <gridItem id="BSP_CFG_INVALID_MEMORY_ACCESS_DETECTION_ENABLE" selectedIndex="0"/>
+                <gridItem id="BSP_CFG_RAM_GUARD_FUNC" selectedIndex="0"/>
+                <gridItem id="BSP_CFG_PORT_FUNCTION_GUARD" selectedIndex="1"/>
+                <gridItem id="BSP_CFG_INT_FUNCTION_GUARD" selectedIndex="0"/>
+                <gridItem id="BSP_CFG_CHIP_STATE_CTRL_GUARD" selectedIndex="0"/>
+                <gridItem id="BSP_CFG_DATA_FLASH_ACCESS_ENABLE" selectedIndex="0"/>
+                <gridItem id="BSP_CFG_CONFIGURATOR_SELECT" selectedIndex="1"/>
+                <gridItem id="BSP_CFG_CLOCK_OPERATION_API_FUNCTIONS_DISABLE" selectedIndex="1"/>
+                <gridItem id="BSP_CFG_GET_FREQ_API_FUNCTIONS_DISABLE" selectedIndex="0"/>
+                <gridItem id="BSP_CFG_SET_CLOCK_SOURCE_API_FUNCTIONS_DISABLE" selectedIndex="1"/>
+                <gridItem id="BSP_CFG_CHANGE_CLOCK_SETTING_API_FUNCTIONS_DISABLE" selectedIndex="1"/>
+                <gridItem id="BSP_CFG_SOFTWARE_DELAY_API_FUNCTIONS_DISABLE" selectedIndex="0"/>
+                <gridItem id="BSP_CFG_PARAM_CHECKING_ENABLE" selectedIndex="1"/>
+                <gridItem id="BSP_CFG_USER_WARM_START_CALLBACK_PRE_INITC_ENABLED" selectedIndex="0"/>
+                <gridItem id="BSP_CFG_USER_WARM_START_PRE_C_FUNCTION" selectedIndex="my_sw_warmstart_prec_function"/>
+                <gridItem id="BSP_CFG_USER_WARM_START_CALLBACK_POST_INITC_ENABLED" selectedIndex="0"/>
+                <gridItem id="BSP_CFG_USER_WARM_START_POST_C_FUNCTION" selectedIndex="my_sw_warmstart_postc_function"/>
+                <gridItem id="BSP_CFG_WDT_REFRESH_ENABLE" selectedIndex="0"/>
+                <gridItem id="BSP_CFG_USER_WDT_REFRESH_INIT_FUNCTION" selectedIndex="my_sw_wdt_refresh_init_function"/>
+                <gridItem id="BSP_CFG_USER_WDT_REFRESH_SETTING_FUNCTION" selectedIndex="my_sw_wdt_refresh_setting_function"/>
+            </component>
+            <source description="RL78 Software Integration System" display="RL78 Software Integration System" id="com.renesas.smc.tools.swcomponent.rl78.sis.source"/>
+            <source description="RL78 Software Integration System" display="RL78 Software Integration System" id="com.renesas.smc.tools.swcomponent.rl78.sis.source"/>
+        </configuration>
+        <configuration inuse="true" name="r_rfd_rl78_t01_dataflash">
+            <component description="Dependency : r_bsp version(s) 1.62&#10;Dependency : r_rfd_rl78_t01_common version(s) 1.20&#10;The API functions of Renesas Flash Driver RL78 Type 01 are called from the user program to reprogram the data flash memory in the RL78/G2x." detailDescription="Flash Driver[Renesas Flash Driver RL78 Type01 Data Flash]" display="r_rfd_rl78_t01_dataflash" id="r_rfd_rl78_t01_dataflash1.20" version="1.20"/>
+            <source description="Components supporting Software integration" display="Generic SW" id="com.renesas.smc.tools.swcomponent.generic.source"/>
+            <source description="Components supporting Software integration" display="Generic SW" id="com.renesas.smc.tools.swcomponent.generic.source"/>
         </configuration>
     </tool>
     <tool id="System">
