@@ -649,7 +649,7 @@
         </configuration>
         <configuration apiMode="FULL_API" id="64fab87d-d6e2-4514-9059-24bd17f7cb87" inuse="true" name="Config_ADC">
             <allocatable id="ADC">
-                <osocket id="ADCConversionMode" value="ContinuousSelect"/>
+                <osocket id="ADCConversionMode" value="OneshotSelect"/>
                 <osocket id="ADCTriggerMode" value="SoftwareNoWait"/>
                 <osocket id="ADCVREFPlus" value="VDD"/>
                 <isocket id="fCLK" selection="Clock.tool_clock_fCLK" value="3.2E7"/>
@@ -685,7 +685,7 @@
                     <item id="intitl" input="" vlaue="0"/>
                     <item id="elclEvent" input="" vlaue="0"/>
                 </option>
-                <option enabled="true" id="operationMode" selection="continuousSelect">
+                <option enabled="true" id="operationMode" selection="oneshotSelect">
                     <item id="continuousScan" input="" vlaue="0"/>
                     <item id="oneshotSelect" input="" vlaue="0"/>
                     <item id="oneshotScan" input="" vlaue="0"/>

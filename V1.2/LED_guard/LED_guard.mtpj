@@ -2431,7 +2431,6 @@ src\smc_gen\r_bsp\board\generic_rl78_g23
       <DebuggerProperty-HookProperty-HookTransaction-Broke-Length>0</DebuggerProperty-HookProperty-HookTransaction-Broke-Length>
       <DebuggerProperty-HookProperty-HookTransaction-Connected-Length>0</DebuggerProperty-HookProperty-HookTransaction-Connected-Length>
       <DebuggerProperty-HookProperty-HookTransaction-Disconnecting-Length>0</DebuggerProperty-HookProperty-HookTransaction-Disconnecting-Length>
-      <DebuggerProperty-EssentialProperty-EmulatorConnect-SerialNumber />
     </Instance>
     <Instance Guid="bb1d4423-8c5b-49b3-9ad1-9f8f9ef1325f">
       <DeviceChangedCounter>0</DeviceChangedCounter>

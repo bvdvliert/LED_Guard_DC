@@ -37,6 +37,8 @@
 #define L_MCLK_FREQ_1MHz (1000000uL)
 #define L_MCLK_ROUNDUP_VALUE (999999uL)
 
+#define DAC_MAX (231) // 10.03 V
+
 void main(void);
 
 enum State
@@ -45,14 +47,23 @@ enum State
 	CALIBRATIONSTATE
 };
 
-void initDataFlash()
+struct calibrationValue
+{
+	uint16_t AI;
+	uint16_t current;
+	uint16_t voltage;
+};
+
+struct calibrationValue __near calibrationValues[DAC_MAX + 1];
+
+void initDataFlash(void)
 {
 	uint32_t l_mclk_freq = R_BSP_GetFclkFreqHz();
 	l_mclk_freq = (l_mclk_freq + L_MCLK_ROUNDUP_VALUE) / L_MCLK_FREQ_1MHz;
 	R_RFD_Init((uint8_t)l_mclk_freq);
 }
 
-void waitSeqEnd()
+void waitSeqEnd(void)
 {
 	while (R_RFD_ENUM_RET_STS_BUSY == R_RFD_CheckCFDFSeqEndStep1())
 		;
@@ -107,6 +118,23 @@ e_rfd_ret_t readDataFlash(uint32_t i_u32_start_addr,
 	return R_RFD_ENUM_RET_STS_OK;
 }
 
+void delay(uint16_t clkticks)
+{
+	for (int i = 0; i < clkticks; i++)
+		for (int j = 0; j < 1000; j++)
+			;
+}
+
+void writeCalibrationValues(void)
+{
+	writeDataFlash(DF_ADDRESS, sizeof(calibrationValues), (uint8_t *)&calibrationValues);
+}
+
+void readCalibrationValues(void)
+{
+	readDataFlash(DF_ADDRESS, sizeof(calibrationValues), (uint8_t *)&calibrationValues);
+}
+
 uint16_t readADC(e_ad_channel_t channel)
 {
 	R_Config_ADC_Set_ADChannel(channel);
@@ -119,23 +147,33 @@ uint16_t readADC(e_ad_channel_t channel)
 	return adcVal;
 }
 
-uint8_t buf[1000];
+long map(int64_t x, int64_t in_min, int64_t in_max, int64_t out_min, int64_t out_max)
+{
+	return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+uint8_t buf[2000];
 void main(void)
 {
 	R_Systeminit();
 	R_Config_ADC_Set_OperationOn();
+	R_Config_DAC0_Create();
+	R_Config_DAC0_Start();
+	R_Config_DAC0_Set_ConversionValue(0);
 
 	initDataFlash();
-	
-	for(int i = 0; i < 40; i++)
-			buf[i] = i+1;
 
-	// writeDataFlash(DF_ADDRESS, 100, buf);
+	for (int i = 0; i < 1500; i++)
+		buf[i] = i + 1;
 
-	for(int i = 0; i < 40; i++)
-			buf[i] = 0;
+	writeDataFlash(DF_ADDRESS, 1500, buf);
 
-	readDataFlash(DF_ADDRESS, 10, buf);
+	for (int i = 0; i < 1500; i++)
+		buf[i] = 0;
+
+	readDataFlash(DF_ADDRESS, 1500, buf);
+
+	readCalibrationValues();
 
 	PIN_WRITE(Q_LED1) = 1;
 	PIN_WRITE(Q_LED2) = 0;
@@ -151,15 +189,16 @@ void main(void)
 		{
 		case DEFAULTSTATE:
 		{
-			const uint8_t maxWrongCount = 10;
+			delay(100);
+			const uint8_t maxWrongCount = 100;
 			static uint8_t wrongCount = 0;
 			static bool alarmState = false;
-			static bool blockVoltage = false;
-			static uint32_t alarmOnMils;
 
 			if (lastState != DEFAULTSTATE)
 			{
 				PIN_WRITE(Q_LED2) = 0;
+				PIN_WRITE(Q_RLY_AQ) = 0;
+				R_Config_DAC0_Set_ConversionValue(0);
 				alarmState = false;
 				wrongCount = 0;
 			}
@@ -168,15 +207,52 @@ void main(void)
 			if (buttonState)
 				nextState = CALIBRATIONSTATE;
 
-			PIN_WRITE(Q_LED3) = (readADC(ANI0_POT) > (ADC_MAX / 2));
+			int ai = readADC(ANI6_AI);
+			int current = readADC(ANI4_CURRENT) - 410;
+			int voltage = readADC(ANI7_VIN);
+			struct calibrationValue belowVal = calibrationValues[DAC_MAX];
+			struct calibrationValue aboveVal = calibrationValues[0];
+
+			for (int i = 0; i <= DAC_MAX; i++)
+				if (calibrationValues[i].AI > ai)
+				{
+					aboveVal = calibrationValues[i];
+					break;
+				}
+
+			for (int j = DAC_MAX; j >= 0; j--)
+				if (calibrationValues[j].AI < ai)
+				{
+					belowVal = calibrationValues[j];
+					break;
+				}
+
+			int expectedCurrent = map(ai, belowVal.AI, aboveVal.AI, belowVal.current, aboveVal.current) - 410;
+			// int expectedVoltage = map(ai, belowVal.AI, aboveVal.AI, belowVal.voltage, aboveVal.voltage);
+
+			bool wrong = false;
+			if (current < expectedCurrent - 10 || current > expectedCurrent + 10)
+				if (current < 0.9 * expectedCurrent || current > 1.1 * expectedCurrent)
+					wrong = true;
+
+			if (!wrong && wrongCount > 0)
+				wrongCount--;
+			else if (wrong)
+				wrongCount++;
+
+			if (wrongCount > maxWrongCount)
+				alarmState = true;
+
+			PIN_WRITE(Q_LED3) = alarmState;
+			PIN_WRITE(Q_ALARM) = alarmState;
+			PIN_WRITE(Q_RELAY) = !alarmState;
+			PIN_WRITE(Q_RLY_AQ) = alarmState; // use the 0V supplied by LED Guard
 
 			break;
 		}
 		case CALIBRATIONSTATE:
 		{
 			static uint8_t outputVoltage;
-			static unsigned long lastIncrementMillis;
-			// unsigned long mils = millis();
 
 			if (lastState != CALIBRATIONSTATE)
 			{
@@ -184,9 +260,40 @@ void main(void)
 				PIN_WRITE(Q_RELAY) = 1;
 				PIN_WRITE(Q_LED3) = 0;
 				PIN_WRITE(Q_ALARM) = 0;
+				PIN_WRITE(Q_RLY_AQ) = 1;
 
 				// Calculate the maximum ouput voltage based on the potentiometer
 				// maxOutputVoltage = MAXAQ / 2 + (uint32_t)(1023 - readADC(AI_POT)) * (MAXAQ / 2 + MAXAQ % 2) / 1023; // Dont know why but it outputs 8V when turning pot to 10V
+
+				outputVoltage = 0;
+			}
+
+			R_Config_DAC0_Set_ConversionValue(outputVoltage);
+			delay(100);
+			const int measavgcnt = 10;
+			uint32_t aisum = 0;
+			uint32_t currentsum = 0;
+			uint32_t voltagesum = 0;
+			for (int i = 0; i < measavgcnt; i++)
+			{
+				currentsum += readADC(ANI4_CURRENT);
+				aisum += readADC(ANI6_AI);
+				voltagesum += readADC(ANI7_VIN);
+			}
+
+			struct calibrationValue val;
+			val.AI = aisum / measavgcnt;
+			val.current = currentsum / measavgcnt;
+			val.voltage = voltagesum / measavgcnt;
+
+			calibrationValues[outputVoltage] = val;
+
+			if (outputVoltage < DAC_MAX)
+				outputVoltage += 1;
+			else
+			{
+				writeCalibrationValues();
+				readCalibrationValues();
 				nextState = DEFAULTSTATE;
 			}
 
