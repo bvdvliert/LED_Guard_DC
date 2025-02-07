@@ -54,7 +54,7 @@ struct calibrationValue
 	uint16_t voltage;
 };
 
-struct calibrationValue __near calibrationValues[DAC_MAX + 1];
+struct calibrationValue calibrationValues[DAC_MAX + 1];
 
 void initDataFlash(void)
 {
@@ -84,6 +84,16 @@ e_rfd_ret_t writeDataFlash(uint32_t i_u32_start_addr,
 		return l_e_rfd_ret_status;
 
 	R_RFD_EraseDataFlashReq(0);
+	waitSeqEnd();
+	R_RFD_EraseDataFlashReq(1);
+	waitSeqEnd();
+	R_RFD_EraseDataFlashReq(2);
+	waitSeqEnd();
+	R_RFD_EraseDataFlashReq(3);
+	waitSeqEnd();
+	R_RFD_EraseDataFlashReq(4);
+	waitSeqEnd();
+	R_RFD_EraseDataFlashReq(5);
 	waitSeqEnd();
 
 	for (uint16_t l_u16_count = 0u; l_u16_count < i_u16_write_data_length; l_u16_count++)
@@ -162,17 +172,6 @@ void main(void)
 	R_Config_DAC0_Set_ConversionValue(0);
 
 	initDataFlash();
-
-	for (int i = 0; i < 1500; i++)
-		buf[i] = i + 1;
-
-	writeDataFlash(DF_ADDRESS, 1500, buf);
-
-	for (int i = 0; i < 1500; i++)
-		buf[i] = 0;
-
-	readDataFlash(DF_ADDRESS, 1500, buf);
-
 	readCalibrationValues();
 
 	PIN_WRITE(Q_LED1) = 1;
@@ -207,6 +206,17 @@ void main(void)
 			if (buttonState)
 				nextState = CALIBRATIONSTATE;
 
+			float permittedError;
+			int ai_dip = readADC(ANI1_DIP);
+			if (ai_dip < 700)
+				permittedError = 0.2;
+			else if (ai_dip > 1680 && ai_dip < 3000)
+				permittedError = 0.15;
+			else if (ai_dip > 700 && ai_dip < 1680)
+				permittedError = 0.1;
+			else
+				permittedError = 0.05;
+
 			int ai = readADC(ANI6_AI);
 			int current = readADC(ANI4_CURRENT) - 410;
 			int voltage = readADC(ANI7_VIN);
@@ -232,7 +242,7 @@ void main(void)
 
 			bool wrong = false;
 			if (current < expectedCurrent - 10 || current > expectedCurrent + 10)
-				if (current < 0.9 * expectedCurrent || current > 1.1 * expectedCurrent)
+				if (current < (1.0 - permittedError) * expectedCurrent || current > (1.0 + permittedError) * expectedCurrent)
 					wrong = true;
 
 			if (!wrong && wrongCount > 0)
@@ -269,7 +279,7 @@ void main(void)
 			}
 
 			R_Config_DAC0_Set_ConversionValue(outputVoltage);
-			delay(100);
+			delay(500);
 			const int measavgcnt = 10;
 			uint32_t aisum = 0;
 			uint32_t currentsum = 0;
@@ -293,7 +303,6 @@ void main(void)
 			else
 			{
 				writeCalibrationValues();
-				readCalibrationValues();
 				nextState = DEFAULTSTATE;
 			}
 

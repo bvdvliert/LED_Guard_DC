@@ -1271,7 +1271,7 @@ src\smc_gen\r_bsp\board\generic_rl78_g23
       <LinkOptionRrm-DefaultValue>False</LinkOptionRrm-DefaultValue>
       <LinkOptionRrmValue-DefaultValue />
       <IsLockedByUser>False</IsLockedByUser>
-      <TimeTagModified--0>-8584675177374254681</TimeTagModified--0>
+      <TimeTagModified--0>-8584626712234064226</TimeTagModified--0>
       <LinkOptionAutoSectionLayout-0>True</LinkOptionAutoSectionLayout-0>
       <LinkOptionCpu-0>False</LinkOptionCpu-0>
       <LinkOptionDebug-0>Debug</LinkOptionDebug-0>
@@ -1307,7 +1307,7 @@ src\smc_gen\r_bsp\board\generic_rl78_g23
       <LinkOptionPadding-0>False</LinkOptionPadding-0>
       <LinkOptionSecurityOptByte-0>False</LinkOptionSecurityOptByte-0>
       <LinkOptionShowSymbol-0>True</LinkOptionShowSymbol-0>
-      <LinkOptionStart-0 />
+      <LinkOptionStart-0>.const,.text,.RLIB,.SLIB,.textf,.constf,.data,.sdata,.init_array,RFD_DATA_n,RFD_CMN_f,RFD_DF_f,SMP_CMN_f,SMP_DF_f/03000,.dataR,.bss,RFD_DATA_nR/FCF00,.sdataR,.sbss/FFE20</LinkOptionStart-0>
       <LinkOptionTotalSize-0>False</LinkOptionTotalSize-0>
       <LinkOptionVfinfoFileName-0>%ProjectName%_vfi.h</LinkOptionVfinfoFileName-0>
       <LinkOptionChangeMessageInformation-0>None</LinkOptionChangeMessageInformation-0>
@@ -1328,6 +1328,7 @@ src\smc_gen\r_bsp\board\generic_rl78_g23
       <LinkOptionPreLinkCommands-0 />
       <LinkOptionRom-0>.data=.dataR
 .sdata=.sdataR
+RFD_DATA_n=RFD_DATA_nR
 </LinkOptionRom-0>
       <LinkOptionShowXreference-0>False</LinkOptionShowXreference-0>
       <LinkOptionVect-0 />

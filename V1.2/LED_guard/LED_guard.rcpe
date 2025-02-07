@@ -266,8 +266,10 @@
           <Option>-LISt=%BuildModeName%\%ProjectName%.map</Option>
           <Option>-SHow=SYmbol,Total_size</Option>
           <Option>-AUTO_SECTION_LAYOUT</Option>
+          <Option>-STARt=.const,.text,.RLIB,.SLIB,.textf,.constf,.data,.sdata,.init_array,RFD_DATA_n,RFD_CMN_f,RFD_DF_f,SMP_CMN_f,SMP_DF_f/03000,.dataR,.bss,RFD_DATA_nR/FCF00,.sdataR,.sbss/FFE20</Option>
           <Option>-ROm=.data=.dataR</Option>
           <Option>-ROm=.sdata=.sdataR</Option>
+          <Option>-ROm=RFD_DATA_n=RFD_DATA_nR</Option>
           <Option>-NOMessage</Option>
           <Option>-MEMory=High</Option>
           <Option>-NOLOgo</Option>
